@@ -1,7 +1,9 @@
+#pragma once
 #include "std_lib_facilities.h"
 #include "Point.h"
 #include "Color.h"
 #include "Image.h"
+#include "sound&music.h"
 
 
 struct Config{
@@ -30,7 +32,7 @@ class Physics {
 };
 
 
-class Bird : public Physics, public Image{
+class Bird : public Physics, public Image, public Config{
     
     Image image;
     Point currentPosition;
@@ -59,8 +61,9 @@ class Bird : public Physics, public Image{
         Color getColor(){return color;}
         void setHeight(int h){birdHeight = h;}
         void setWidth(int w){birdWidth = w;}
+        void setMoveSpeed(int s){moveSpeed = s;}
 
-        void crash(){dead = true;}
+        void crash();
         bool hasCrashed(){return dead;}
         void revive(){dead = false;}
         void setCurrentPosition(Point p){currentPosition = p;};
@@ -77,7 +80,7 @@ class Bird : public Physics, public Image{
 
 
 
-class Obsticle : public Image {
+class Obsticle : public Image, public Config {
     FloatPoint topLeftPos;
     int topLeftGapPos;
     int pipeWidth = 30;
@@ -88,13 +91,7 @@ class Obsticle : public Image {
     bool passed = false;
 
     public:
-        Obsticle(int Win_W, int Win_H) : topLeftPos{static_cast<double>(Win_W), 0} 
-        {
-            random_device rd;
-            default_random_engine generator(rd());
-            uniform_int_distribution<int> distribution(20, Win_H-pipeHeight-20);
-            topLeftGapPos = distribution(generator);
-        }
+        Obsticle(int Win_W, int Win_H);
 
     Point getTopLeft(){return {static_cast<int>(topLeftPos.x),static_cast<int>(topLeftPos.y)};}
     int getPipeWidth(){return pipeWidth;}

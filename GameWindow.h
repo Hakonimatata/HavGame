@@ -1,3 +1,4 @@
+#pragma once
 #include "std_lib_facilities.h"
 #include "AnimationWindow.h"
 #include "Entities.h"
@@ -28,7 +29,6 @@ class GameWindow : public TDT4102::AnimationWindow, public Config {
 
     public:
         GameWindow(int W = 1920, int H = 1080);
-        void config();
         void run();
         void drawBird(Bird& bird);
         void drawObsticle(Obsticle& obsticle);

@@ -1,4 +1,5 @@
 #include "GameWindow.h"
+#include "sound&music.h"
 
 
 GameWindow::GameWindow(int W, int H) : 
@@ -38,9 +39,9 @@ void GameWindow::drawBird(Bird& bird){
 }
 
 void GameWindow::run(){
+    playSoundLoop("background_music.wav"); // evig musikk
     fillObsticleVector();
     fillBirdsVector();
-    config(); // gjør endringer definert i "configure_game.txt"
 
     while(!should_close()){ // spilløkke
         drawBackground();
@@ -184,11 +185,12 @@ void GameWindow::drawObsticle(Obsticle& obsticle){
 
     //flytter obsticle bakerst når den går ut av skjermen:
     if(topLeft.x < -obsticle.getObsticleSPace()){
-        obsticles.erase(obsticles.begin());
         Obsticle newObsticle{Win_W, Win_H};
         Point backPos = obsticles.back().getTopLeft();
         newObsticle.setTopLeft(backPos.x + obsticle.getObsticleSPace());
+        newObsticle.setPipeSpeed(obsticles.at(0).getPipeSpeed());
         obsticles.push_back(newObsticle);
+        obsticles.erase(obsticles.begin());
     }
 }
 
@@ -272,36 +274,4 @@ void GameWindow::drawScore(){
     if(numberOfPLayers == 3){
        draw_text({390, 10}, "Player 3:  " + to_string(birds.at(2).getScore()), Color::white, 30, Font::arial);
     }
-}
-
-void GameWindow::config(){
-    //gjør endringer fra config mapet på hver bird og hver obsticle
-    for (auto& bird : birds){
-        if (configMap.find("gravity") != configMap.end()){
-            bird.setG(stod(configMap.at("gravity")));
-        }
-        if (configMap.find("jumpPower") != configMap.end()){
-            bird.setJumpPower(stoi(configMap.at("jumpPower")));
-        }
-        if (configMap.find("birdHeight") != configMap.end()){
-            bird.setHeight(stoi(configMap.at("birdHeight")));
-        }
-        if (configMap.find("birdWidth") != configMap.end()){
-            bird.setWidth(stoi(configMap.at("birdWidth")));
-        }
-    }
-    for(auto& obsticle : obsticles){
-        if (configMap.find("pipeWidth") != configMap.end()){
-            obsticle.setPipeWidth(stoi(configMap.at("pipeWidth")));
-        }
-        if (configMap.find("pipeHeight") != configMap.end()){
-            obsticle.setPipeHeight(stoi(configMap.at("pipeHeight")));
-        }
-        if (configMap.find("pipeSpeed") != configMap.end()){
-            obsticle.setPipeSpeed(stoi(configMap.at("pipeSpeed")));
-        }
-        if (configMap.find("obsticleSpace") != configMap.end()){
-            obsticle.setObsticleSpace(stoi(configMap.at("obsticleSpace")));
-        }
-    } 
 }
