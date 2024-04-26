@@ -277,3 +277,4 @@ void GameWindow::drawScore(){
 }
 
 //Hei
+//Dette er en endring
