@@ -275,6 +275,3 @@ void GameWindow::drawScore(){
        draw_text({390, 10}, "Player 3:  " + to_string(birds.at(2).getScore()), Color::white, 30, Font::arial);
     }
 }
-
-//Hei
-//Dette er en endring
