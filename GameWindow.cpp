@@ -35,16 +35,14 @@ void GameWindow::drawBird(Bird& bird){
         //tegn bilde av bird:
         draw_image({bird.getPosition().x - imageShift, bird.getPosition().y - imageShift}, bird.getImage(), bird.getBirdWidth() + imageShift, bird.getBirdHeight() + imageShift);
     }
-    
-    
-
 }
 
 void GameWindow::run(){
     fillObsticleVector();
     fillBirdsVector();
+    config(); // gjør endringer definert i "configure_game.txt"
 
-    while(!should_close()){
+    while(!should_close()){ // spilløkke
         drawBackground();
 
         //ittere over obsticles for å bevege hver av dem:
@@ -274,4 +272,36 @@ void GameWindow::drawScore(){
     if(numberOfPLayers == 3){
        draw_text({390, 10}, "Player 3:  " + to_string(birds.at(2).getScore()), Color::white, 30, Font::arial);
     }
+}
+
+void GameWindow::config(){
+    //gjør endringer fra config mapet på hver bird og hver obsticle
+    for (auto& bird : birds){
+        if (configMap.find("gravity") != configMap.end()){
+            bird.setG(stod(configMap.at("gravity")));
+        }
+        if (configMap.find("jumpPower") != configMap.end()){
+            bird.setJumpPower(stoi(configMap.at("jumpPower")));
+        }
+        if (configMap.find("birdHeight") != configMap.end()){
+            bird.setHeight(stoi(configMap.at("birdHeight")));
+        }
+        if (configMap.find("birdWidth") != configMap.end()){
+            bird.setWidth(stoi(configMap.at("birdWidth")));
+        }
+    }
+    for(auto& obsticle : obsticles){
+        if (configMap.find("pipeWidth") != configMap.end()){
+            obsticle.setPipeWidth(stoi(configMap.at("pipeWidth")));
+        }
+        if (configMap.find("pipeHeight") != configMap.end()){
+            obsticle.setPipeHeight(stoi(configMap.at("pipeHeight")));
+        }
+        if (configMap.find("pipeSpeed") != configMap.end()){
+            obsticle.setPipeSpeed(stoi(configMap.at("pipeSpeed")));
+        }
+        if (configMap.find("obsticleSpace") != configMap.end()){
+            obsticle.setObsticleSpace(stoi(configMap.at("obsticleSpace")));
+        }
+    } 
 }

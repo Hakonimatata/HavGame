@@ -3,19 +3,19 @@
 
 int Win_W = 1920;
 int Win_H = 1080;
-void config();
+void configWindow();
 
 int main() {
-    config();
+    configWindow();
     GameWindow G{Win_W, Win_H};
     G.run();
 
     return 0;
 }
 
-void config(){
+void configWindow(){ // kan fikse dette!!
     map<string, string> configMap{};
-    filesystem::path filepath{"konfigurering.txt"};
+    filesystem::path filepath{"configure_game.txt"};
     if (filesystem::exists(filepath)){
         ifstream ifs{filepath};
         string variable, value = "";

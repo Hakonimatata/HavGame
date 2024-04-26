@@ -5,7 +5,7 @@
 #include "Image.h"
 #include "widgets/Button.h"
 
-class GameWindow : public TDT4102::AnimationWindow {
+class GameWindow : public TDT4102::AnimationWindow, public Config {
 
     int Win_W;
     int Win_H;
@@ -28,6 +28,7 @@ class GameWindow : public TDT4102::AnimationWindow {
 
     public:
         GameWindow(int W = 1920, int H = 1080);
+        void config();
         void run();
         void drawBird(Bird& bird);
         void drawObsticle(Obsticle& obsticle);

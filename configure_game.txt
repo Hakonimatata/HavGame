@@ -1,0 +1,11 @@
+Win_W, 1920
+Win_H, 1080
+gravity, -2
+jumpPower, 20
+moveSpeed, 3
+birdHeight, 70
+birdWidth, 50
+pipeWidth = 30
+pipeHeight = 200
+pipeSpeed = 4
+obsticleSpace = 500

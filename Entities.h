@@ -5,7 +5,8 @@
 
 
 struct Config{
-    // skal lese fra fil og sette inn i et map som senere kan brukes til å oppdatere oppførsel
+    map<string, string> configMap;
+    Config();
 };
 
 struct FloatPoint{
@@ -24,6 +25,7 @@ class Physics {
         void setVelocity(int v){velocity_y = v;} 
         double getVelocity(){return velocity_y;}
         double getG(){return g;}
+        void setG(double d){ g = d;}
         double getDt(){return dt;}
 };
 
@@ -40,11 +42,10 @@ class Bird : public Physics, public Image{
     Color color;
     int score = 0;
 
-    bool falling = false;
+    bool falling = false; // hindrer at bird faller før man har trykket jump
 
     public:
-        Bird(int x, int y, string image) : currentPosition{x,y}, image{image}{}
-
+        Bird(int x, int y, string image);
         void jump();
         void fall();
         void moveRight();
@@ -56,6 +57,8 @@ class Bird : public Physics, public Image{
 
         void setColor(Color c){color = c;}
         Color getColor(){return color;}
+        void setHeight(int h){birdHeight = h;}
+        void setWidth(int w){birdWidth = w;}
 
         void crash(){dead = true;}
         bool hasCrashed(){return dead;}
@@ -95,11 +98,14 @@ class Obsticle : public Image {
 
     Point getTopLeft(){return {static_cast<int>(topLeftPos.x),static_cast<int>(topLeftPos.y)};}
     int getPipeWidth(){return pipeWidth;}
+    void setPipeWidth(int w){pipeWidth = w;}
+    void setPipeHeight(int h){pipeHeight = h;}
     void setTopLeft(int pos){topLeftPos.x = pos;}
     int getGapPos(){return topLeftGapPos;}
     void moveObsticle(){topLeftPos.x-=pipeSpeed;}
     int getPipeHeight(){return pipeHeight;}
     int getObsticleSPace(){return obsticleSpace;}
+    void setObsticleSpace(int space){obsticleSpace = space;}
     void setPipeSpeed(double speed){pipeSpeed = speed;}
     double getPipeSpeed(){return pipeSpeed;}
 
