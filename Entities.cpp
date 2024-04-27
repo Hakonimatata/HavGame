@@ -12,6 +12,12 @@ Config::Config(){ // setter opp config mapet
     }
 }
 
+void FloatPoint::normalize(){
+    double magnitude = sqrt(pow(x,2) + pow(y,2));
+    x = x/magnitude;
+    y = y/magnitude;
+}
+
 Bird::Bird(int x, int y, string image) : currentPosition{x,y}, image{image}{
     
     
@@ -41,18 +47,18 @@ Bird::Bird(int x, int y, string image) : currentPosition{x,y}, image{image}{
 
 void Bird::jump(){
     //sett ny v0 osv 
-    if(!dead){
+    if(!crashed){
         setVelocity(jumpPower);
         playSound("MediaFiles\\jump_sound.wav");
     }
 };
 
 void Bird::crash(){
-    pushImpulse({-1,1}, 20.0);
-    if(!dead){
+    
+    if(!crashed){
         playSound("MediaFiles\\death_sound.wav");
     }
-    dead = true; 
+    crashed = true; 
 }
 
 void Bird::incrementScore(){
@@ -121,4 +127,64 @@ void Bird::push(){
         currentPosition.y += bounceDirection.y * bounceVelocity;
         bounceVelocity -= bounceVelocity * friction;
     }
+}
+
+
+
+
+Point Obsticle::getTopLeft() const {
+    return {static_cast<int>(topLeftPos.x), static_cast<int>(topLeftPos.y)};
+}
+
+void Obsticle::setTopLeft(int pos)  {
+    topLeftPos.x = pos;
+}
+
+int Obsticle::getPipeWidth() const {
+    return pipeWidth;
+}
+
+void Obsticle::setPipeWidth(int w) {
+    pipeWidth = w;
+}
+
+int Obsticle::getPipeHeight() const {
+    return pipeHeight;
+}
+
+void Obsticle::setPipeHeight(int h) {
+    pipeHeight = h;
+}
+
+int Obsticle::getGapPos() const {
+    return topLeftGapPos;
+}
+
+int Obsticle::getObsticleSpace() const {
+    return obsticleSpace;
+}
+
+void Obsticle::setObsticleSpace(int space) {
+    obsticleSpace = space;
+}
+
+void Obsticle::setPipeSpeed(double speed) {
+    pipeSpeed = speed;
+}
+
+double Obsticle::getPipeSpeed() const {
+    return pipeSpeed;
+}
+
+void Obsticle::moveObsticle() {
+    topLeftPos.x -= pipeSpeed;
+}
+
+void Obsticle::passedObsticle(const Bird& bird) {
+    passed_by[&bird] = true;
+}
+
+bool Obsticle::isPassedObsticle(const Bird& bird) const {
+    auto it = passed_by.find(&bird);
+    return it != passed_by.end() && it->second;
 }

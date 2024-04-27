@@ -5,6 +5,7 @@
     "cmake.configureOnEdit": false,
     "makefile.alwaysPreConfigure": false,
     "files.associations": {
-        "thread": "cpp"
+        "thread": "cpp",
+        "sstream": "cpp"
     }
 }

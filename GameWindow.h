@@ -37,7 +37,7 @@ class GameWindow : public TDT4102::AnimationWindow, public Config {
         void fillObsticleVector();
         void fillBirdsVector();
         bool checkCollition(Obsticle& obsticle, Bird& bird);
-        bool checkCollition(Bird& bird1, Bird& bird2);
+        bool checkCollision(Bird& bird1, Bird& bird2);
         void bounce(vector<Bird>& birds); //bounce logikk
         void gameOver();
         void restartGame();

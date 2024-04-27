@@ -25,7 +25,7 @@ GameWindow::GameWindow(int W, int H) :
 
 
 void GameWindow::drawBird(Bird& bird){
-    if (bird.getPosition().y > Win_H){
+    if (bird.getPosition().y > Win_H || bird.getPosition().y < -Win_H/4 || bird.getPosition().x < 0){
         bird.crash();
     }
     
@@ -39,7 +39,7 @@ void GameWindow::drawBird(Bird& bird){
 }
 
 void GameWindow::run(){
-    playSoundLoop("MediaFiles\\background_music.wav"); // evig musikk
+    playSoundLoop("MediaFiles\\background_music.wav"); // evig musikk. Kan ikke endres undervis slik den er nå
     fillObsticleVector();
     fillBirdsVector();
 
@@ -60,19 +60,21 @@ void GameWindow::run(){
         for(auto& bird : birds){
             drawBird(bird);
             
-            if (bird.canFall() || bird.hasCrashed()){
+            if (bird.getCanFall() || bird.isCrashed()){
                 bird.fall(); // oppdaterer fall fysikken
                 bird.push(); // oppdaterer push fysikken
             }
 
             for(auto& obsticle : obsticles){
-                if (checkCollition(obsticle, bird)){
+                if (checkCollition(obsticle, bird) && !bird.isCrashed()){
                     bird.crash();
+                    bird.pushImpulse({-2,1}, 3*obsticle.getPipeSpeed());
+                    playSound("MediaFiles\\punch_sound.wav");
                 }
                 //teller score:
-                if(bird.getPosition().x > obsticle.getTopLeft().x + obsticle.getPipeWidth() && !obsticle.isPassedObsticle() && !bird.hasCrashed()){
+                if(bird.getPosition().x > obsticle.getTopLeft().x + obsticle.getPipeWidth() && !obsticle.isPassedObsticle(bird) && !bird.isCrashed()){
                     bird.incrementScore();
-                    obsticle.passedObsticle();
+                    obsticle.passedObsticle(bird);
                 }
             }
         }
@@ -96,15 +98,15 @@ void GameWindow::handleInput(){
     
     
     if(currentUpKeyState && !lastUpKeyState) {
-        birds.at(0).setFallStateAtStart(true);
+        birds.at(0).setCanfall(true);
         birds.at(0).jump();
     }   
 
-    if(currentRightKeyState && !lastRightKeyState && !birds.at(0).hasCrashed()) {
+    if(currentRightKeyState && !lastRightKeyState && !birds.at(0).isCrashed()) {
         birds.at(0).moveRight();
     }  
 
-    if(currentLeftKeyState && !lastLeftKeyState && !birds.at(0).hasCrashed()) {
+    if(currentLeftKeyState && !lastLeftKeyState && !birds.at(0).isCrashed()) {
         birds.at(0).moveLeft();
     }
 
@@ -127,15 +129,15 @@ void GameWindow::handleInput(){
         bool currentAKeyState = is_key_down(KeyboardKey::A);
 
         if(currentWKeyState && !lastWKeyState) {
-            birds.at(1).setFallStateAtStart(true);
+            birds.at(1).setCanfall(true);
             birds.at(1).jump();
         }   
 
-        if(currentDKeyState && !lastDKeyState && !birds.at(1).hasCrashed()) {
+        if(currentDKeyState && !lastDKeyState && !birds.at(1).isCrashed()) {
             birds.at(1).moveRight();
         }  
 
-        if(currentAKeyState && !lastAKeyState && !birds.at(1).hasCrashed()) {
+        if(currentAKeyState && !lastAKeyState && !birds.at(1).isCrashed()) {
             birds.at(1).moveLeft();
         }
 
@@ -154,15 +156,15 @@ void GameWindow::handleInput(){
         bool currentJKeyState = is_key_down(KeyboardKey::J);
 
         if(currentIKeyState && !lastIKeyState) {
-            birds.at(2).setFallStateAtStart(true);
+            birds.at(2).setCanfall(true);
             birds.at(2).jump();
         }   
 
-        if(currentLKeyState && !lastLKeyState && !birds.at(2).hasCrashed()) {
+        if(currentLKeyState && !lastLKeyState && !birds.at(2).isCrashed()) {
             birds.at(2).moveRight();
         }  
 
-        if(currentJKeyState && !lastJKeyState && !birds.at(2).hasCrashed()) {
+        if(currentJKeyState && !lastJKeyState && !birds.at(2).isCrashed()) {
             birds.at(2).moveLeft();
         }
 
@@ -186,10 +188,10 @@ void GameWindow::drawObsticle(Obsticle& obsticle){
     draw_rectangle({topLeft.x-5, gapPos + pipeHeight}, width+2*5, 20, Color::green);
 
     //flytter obsticle bakerst når den går ut av skjermen:
-    if(topLeft.x < -obsticle.getObsticleSPace()){
+    if(topLeft.x < -obsticle.getObsticleSpace()){
         Obsticle newObsticle{Win_W, Win_H};
         Point backPos = obsticles.back().getTopLeft();
-        newObsticle.setTopLeft(backPos.x + obsticle.getObsticleSPace());
+        newObsticle.setTopLeft(backPos.x + obsticle.getObsticleSpace());
         newObsticle.setPipeSpeed(obsticles.at(0).getPipeSpeed());
         obsticles.push_back(newObsticle);
         obsticles.erase(obsticles.begin());
@@ -199,7 +201,7 @@ void GameWindow::drawObsticle(Obsticle& obsticle){
 
 
 void GameWindow::fillObsticleVector(){
-    int space = obsticle.getObsticleSPace();
+    int space = obsticle.getObsticleSpace();
     int numObsticles = Win_W/space + 1;
     
     for(int i = 0; i <= numObsticles; i++){
@@ -252,8 +254,8 @@ void GameWindow::fillBirdsVector(){
 void GameWindow::restartGame(){
     int mellomrom = 0;
     for(auto& bird : birds){
-        bird.setFallStateAtStart(false);
-        bird.revive();
+        bird.setCanfall(false);
+        bird.setCrashed(false);
         bird.setVelocity(0.0);
         bird.setBounceVelocity(0.0);
         bird.resetScore();
@@ -280,7 +282,7 @@ void GameWindow::drawScore(){
     }
 }
 
-bool GameWindow::checkCollition(Bird& bird1, Bird& bird2){
+bool GameWindow::checkCollision(Bird& bird1, Bird& bird2){
     bool x_overlap = (bird1.getPosition().x < bird2.getPosition().x + bird2.getBirdWidth()) && (bird1.getPosition().x + bird1.getBirdWidth() > bird2.getPosition().x);
     bool y_overlap = (bird1.getPosition().y < bird2.getPosition().y + bird2.getBirdHeight()) && (bird1.getPosition().y + bird1.getBirdHeight() > bird2.getPosition().y);
 
@@ -291,13 +293,11 @@ void GameWindow::bounce(vector<Bird>& birds){
     
     for(auto& bird : birds){
         for(auto& other : birds){
-            if((other.get() != bird.get()) && checkCollition(bird, other)){
+            if((other.get() != bird.get()) && checkCollision(bird, other)){
                 FloatPoint direction = {static_cast<double>(bird.getPosition().x - other.getPosition().x), static_cast<double>(bird.getPosition().y - other.getPosition().y)};
                 bird.pushImpulse(direction, 10.0); // 10 er hvor kraftig bouncen er
             }
         }
     }   
 }
-
-
     
