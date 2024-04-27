@@ -14,6 +14,11 @@ struct Config{
 struct FloatPoint{
     double x;
     double y;
+    void normalize(){
+        double magnitude = sqrt(pow(x,2) + pow(y,2));
+        x = x/magnitude;
+        y = y/magnitude;
+    }
 };
 
 
@@ -44,38 +49,54 @@ class Bird : public Physics, public Image, public Config{
     Color color;
     int score = 0;
 
+    //medlemsvariabler for bounce funksjonalitet:
+    FloatPoint bounceDirection = {0.0, 0.0};
+    double bounceVelocity = 0.0;
+    double friction = 0.05;
+
+    //out of bounds (oppdateres av config)
+    int mapWidth = 1920;
+    int mapHeight = 1080;
+
+
     bool falling = false; // hindrer at bird faller før man har trykket jump
 
     public:
         Bird(int x, int y, string image);
+
         void jump();
         void fall();
         void moveRight();
         void moveLeft();
+        void crash();
+        void incrementScore();
+        void resetScore(){score = 0;}
+
+        void pushImpulse(FloatPoint direction, double velocity);
+        void push();
+
+
+        //get- og setfunksjoner
+        Bird* get(){return this;}
         void setJumpPower(int power){jumpPower = power;}
         Point getPosition(){return currentPosition;}
         int getBirdHeight(){return birdHeight;}
         int getBirdWidth(){return birdWidth;}
-
         void setColor(Color c){color = c;}
         Color getColor(){return color;}
         void setHeight(int h){birdHeight = h;}
         void setWidth(int w){birdWidth = w;}
         void setMoveSpeed(int s){moveSpeed = s;}
 
-        void crash();
         bool hasCrashed(){return dead;}
         void revive(){dead = false;}
         void setCurrentPosition(Point p){currentPosition = p;};
         Image& getImage(){return image;}
         
         int getScore(){return score;}
-        void incrementScore(){score++;}
-        void resetScore(){score = 0;}
-
         bool canFall(){return falling;}
-        void enableFall(){falling = true;}
-        void disableFall(){falling = false;}
+        void setFallStateAtStart(bool v){falling = v;}
+        void setBounceVelocity(double d){bounceVelocity = 0;}
 };  
 
 

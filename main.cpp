@@ -15,7 +15,7 @@ int main() {
 
 void configWindow(){ // kan fikse dette!!
     map<string, string> configMap{};
-    filesystem::path filepath{"configure_game.txt"};
+    filesystem::path filepath{"MediaFiles\\configure_game.txt"};
     if (filesystem::exists(filepath)){
         ifstream ifs{filepath};
         string variable, value = "";

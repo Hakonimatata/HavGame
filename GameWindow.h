@@ -11,7 +11,7 @@ class GameWindow : public TDT4102::AnimationWindow, public Config {
     int Win_W;
     int Win_H;
     int numberOfPLayers = 1;
-    Obsticle obsticle{Win_W, Win_H};
+    Obsticle obsticle{Win_W, Win_H}; // generisk obstcle for å hente verdier fra
     Point birdStartPosition = {150, Win_H/2};
     vector<Obsticle> obsticles;
     vector<Bird> birds;
@@ -37,10 +37,11 @@ class GameWindow : public TDT4102::AnimationWindow, public Config {
         void fillObsticleVector();
         void fillBirdsVector();
         bool checkCollition(Obsticle& obsticle, Bird& bird);
+        bool checkCollition(Bird& bird1, Bird& bird2);
+        void bounce(vector<Bird>& birds); //bounce logikk
         void gameOver();
         void restartGame();
         void drawScore();
-        void configure();
 
         void cb_quitBtn(){this->close();};
         void cb_onePlayer(){birds.clear();numberOfPLayers = 1; fillBirdsVector();  restartGame();};

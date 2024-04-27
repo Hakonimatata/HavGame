@@ -6,7 +6,7 @@ GameWindow::GameWindow(int W, int H) :
     Win_W{W},
     Win_H{H},
     AnimationWindow{0, 0, W, H, "Flappy Bird"},
-    background{"sky.jpg"},
+    background{"MediaFiles\\sky.jpg"},
     quitBtn{{W - 100, 0}, 100, 40, "Quit"},
     onePlayer{{W/2-100, 0}, 100, 40, "1 Player"},
     twoPlayer{{W/2, 0}, 100, 40, "2 Player"},
@@ -29,7 +29,7 @@ void GameWindow::drawBird(Bird& bird){
         bird.crash();
     }
     
-    if (!bird.hasCrashed()){
+    if (bird.getPosition().y <= Win_H){
         // Kommenter ut under for å endre til en boks
         // draw_rectangle(bird.getPosition(), bird.getBirdWidth(), bird.getBirdHeight(), bird.getColor());
         
@@ -39,7 +39,7 @@ void GameWindow::drawBird(Bird& bird){
 }
 
 void GameWindow::run(){
-    playSoundLoop("background_music.wav"); // evig musikk
+    playSoundLoop("MediaFiles\\background_music.wav"); // evig musikk
     fillObsticleVector();
     fillBirdsVector();
 
@@ -54,13 +54,15 @@ void GameWindow::run(){
         
         handleInput(); // håndtere input fra tastatur
         drawScore();
+        bounce(birds); // fjern denne for å skru av bounce mellom birds
 
         //gå over hver bird og sjekk om de krasjer med hver obsticle
         for(auto& bird : birds){
             drawBird(bird);
             
-            if (!bird.hasCrashed()){
-                if(bird.canFall()){bird.fall();}
+            if (bird.canFall() || bird.hasCrashed()){
+                bird.fall(); // oppdaterer fall fysikken
+                bird.push(); // oppdaterer push fysikken
             }
 
             for(auto& obsticle : obsticles){
@@ -94,7 +96,7 @@ void GameWindow::handleInput(){
     
     
     if(currentUpKeyState && !lastUpKeyState) {
-        birds.at(0).enableFall();
+        birds.at(0).setFallStateAtStart(true);
         birds.at(0).jump();
     }   
 
@@ -125,7 +127,7 @@ void GameWindow::handleInput(){
         bool currentAKeyState = is_key_down(KeyboardKey::A);
 
         if(currentWKeyState && !lastWKeyState) {
-            birds.at(1).enableFall();
+            birds.at(1).setFallStateAtStart(true);
             birds.at(1).jump();
         }   
 
@@ -152,7 +154,7 @@ void GameWindow::handleInput(){
         bool currentJKeyState = is_key_down(KeyboardKey::J);
 
         if(currentIKeyState && !lastIKeyState) {
-            birds.at(2).enableFall();
+            birds.at(2).setFallStateAtStart(true);
             birds.at(2).jump();
         }   
 
@@ -208,19 +210,20 @@ void GameWindow::fillObsticleVector(){
 }
 
 bool GameWindow::checkCollition(Obsticle& obsticle, Bird& bird){
-
+    
     int pipe_x = obsticle.getTopLeft().x;
     int gap_y = obsticle.getGapPos();
     int bird_x = bird.getPosition().x;
     int bird_y = bird.getPosition().y;
 
-    if(bird_x + bird.getBirdWidth() > pipe_x && bird_x < (pipe_x + obsticle.getPipeWidth()) //mellom to vegger?
-        && (bird_y < gap_y || bird_y + bird.getBirdHeight() > gap_y + obsticle.getPipeHeight())) // under eller over gap?
-    {
-        return true;
-    }
-    else{return false;}
+    // Sjekk om fuglen kolliderer med røret eller gapet
+    bool between_pipes = (bird_x + bird.getBirdWidth() > pipe_x) && (bird_x < pipe_x + obsticle.getPipeWidth());
+    bool above_gap = bird_y < gap_y;
+    bool below_gap = bird_y + bird.getBirdHeight() > gap_y + obsticle.getPipeHeight();
+
+    return between_pipes && (above_gap || below_gap);
 } 
+
 
 void GameWindow::gameOver(){
     gameEnd = true;
@@ -228,18 +231,18 @@ void GameWindow::gameOver(){
 
 
 void GameWindow::fillBirdsVector(){
-    Bird bird1{birdStartPosition.x, birdStartPosition.y, "havard.png"};
+    Bird bird1{birdStartPosition.x, birdStartPosition.y, "MediaFiles\\havard.png"};
     bird1.setColor(Color::red);
     birds.push_back(bird1);
 
     if(numberOfPLayers >= 2){
-        Bird bird2{birdStartPosition.x + 90, birdStartPosition.y, "havard_2.png"};
+        Bird bird2{birdStartPosition.x + 90, birdStartPosition.y, "MediaFiles\\havard_2.png"};
         bird2.setColor(Color::blue);
         birds.push_back(bird2);
     }
 
     if(numberOfPLayers == 3){
-        Bird bird3{birdStartPosition.x + 90*2, birdStartPosition.y, "havard_3.png"};
+        Bird bird3{birdStartPosition.x + 90*2, birdStartPosition.y, "MediaFiles\\havard_3.png"};
         bird3.setColor(Color::green);
         birds.push_back(bird3);
     }
@@ -249,9 +252,10 @@ void GameWindow::fillBirdsVector(){
 void GameWindow::restartGame(){
     int mellomrom = 0;
     for(auto& bird : birds){
-        bird.disableFall();
+        bird.setFallStateAtStart(false);
         bird.revive();
         bird.setVelocity(0.0);
+        bird.setBounceVelocity(0.0);
         bird.resetScore();
         bird.setCurrentPosition({birdStartPosition.x + mellomrom, birdStartPosition.y});
         mellomrom += 90;
@@ -275,3 +279,25 @@ void GameWindow::drawScore(){
        draw_text({390, 10}, "Player 3:  " + to_string(birds.at(2).getScore()), Color::white, 30, Font::arial);
     }
 }
+
+bool GameWindow::checkCollition(Bird& bird1, Bird& bird2){
+    bool x_overlap = (bird1.getPosition().x < bird2.getPosition().x + bird2.getBirdWidth()) && (bird1.getPosition().x + bird1.getBirdWidth() > bird2.getPosition().x);
+    bool y_overlap = (bird1.getPosition().y < bird2.getPosition().y + bird2.getBirdHeight()) && (bird1.getPosition().y + bird1.getBirdHeight() > bird2.getPosition().y);
+
+    return x_overlap && y_overlap;
+}
+
+void GameWindow::bounce(vector<Bird>& birds){
+    
+    for(auto& bird : birds){
+        for(auto& other : birds){
+            if((other.get() != bird.get()) && checkCollition(bird, other)){
+                FloatPoint direction = {static_cast<double>(bird.getPosition().x - other.getPosition().x), static_cast<double>(bird.getPosition().y - other.getPosition().y)};
+                bird.pushImpulse(direction, 10.0); // 10 er hvor kraftig bouncen er
+            }
+        }
+    }   
+}
+
+
+    
