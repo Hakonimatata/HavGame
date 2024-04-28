@@ -71,7 +71,7 @@ void Bird::incrementScore(){
 
 void Bird::fall(){
     
-    if (currentPosition.y < mapHeight){ //begrense rendering
+    if (currentPosition.y < mapHeight + 100){ //begrense rendering
         double velocity_y = getVelocity();
         double g = getG();
         double dt = getDt();
@@ -93,12 +93,6 @@ void Bird::moveLeft(){
 
 Obsticle::Obsticle(int Win_W, int Win_H) : topLeftPos{static_cast<double>(Win_W), 0} 
 {
-    //genererer tilfeldig gappos
-    random_device rd;
-    default_random_engine generator(rd());
-    uniform_int_distribution<int> distribution(20, Win_H-pipeHeight-20);
-    topLeftGapPos = distribution(generator);
-
     //sjekker configMap
     if (configMap.find("pipeWidth") != configMap.end()){
         setPipeWidth(stoi(configMap.at("pipeWidth")));
@@ -112,6 +106,11 @@ Obsticle::Obsticle(int Win_W, int Win_H) : topLeftPos{static_cast<double>(Win_W)
     if (configMap.find("obsticleSpace") != configMap.end()){
         setObsticleSpace(stoi(configMap.at("obsticleSpace")));
     }
+    //genererer tilfeldig gappos
+    random_device rd;
+    default_random_engine generator(rd());
+    uniform_int_distribution<int> distribution(20, Win_H-pipeHeight-20);
+    topLeftGapPos = distribution(generator);
 }
 
 

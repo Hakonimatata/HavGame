@@ -42,11 +42,11 @@ class GameWindow : public TDT4102::AnimationWindow, public Config {
         void gameOver();
         void restartGame();
         void drawScore();
+        void setAllObsticlesSpeed(vector<Obsticle> obs, int speed);
 
-        void cb_quitBtn(){this->close();};
-        void cb_onePlayer(){birds.clear();numberOfPLayers = 1; fillBirdsVector();  restartGame();};
-        void cb_twoPlayer(){birds.clear(); numberOfPLayers = 2; fillBirdsVector(); restartGame();};
-        void cb_threePlayer(){birds.clear();  numberOfPLayers = 3; fillBirdsVector(); restartGame();};
-
+        void cb_quitBtn(){this->close();}
+        void cb_onePlayer(){birds.clear(); numberOfPLayers = 1; fillBirdsVector();  restartGame();}
+        void cb_twoPlayer(){birds.clear(); numberOfPLayers = 2; fillBirdsVector(); restartGame();}
+        void cb_threePlayer(){birds.clear(); numberOfPLayers = 3; fillBirdsVector(); restartGame();}
 };
 
