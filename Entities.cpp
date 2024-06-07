@@ -14,8 +14,10 @@ Config::Config(){ // setter opp config mapet
 
 void FloatPoint::normalize(){
     double magnitude = sqrt(pow(x,2) + pow(y,2));
-    x = x/magnitude;
-    y = y/magnitude;
+    if(magnitude != 0){
+        x = x/magnitude;
+        y = y/magnitude;
+    }
 }
 
 Bird::Bird(int x, int y, string image) : currentPosition{x,y}, image{image}{
