@@ -1,10 +1,7 @@
 # Hav Game
 
 ## Description
-This is a simple text-based game written in C# where players can explore a mysterious world, solve puzzles, and interact with characters.
-
-## Features
-- 
+This is a simple game written in C# where players can explore a mysterious world, clear obsticles and compete for a crown.
 
 ## Installation
 1. Clone this repository.
@@ -13,7 +10,7 @@ This is a simple text-based game written in C# where players can explore a myste
 4. Run the compiled executable (`Game.exe`).
 
 ## Usage
-- Use arrow keys to move.
+- Use arrow keys to move. Works like flappy bird.
 - Win against your opponents.
 
 ## Contributing
